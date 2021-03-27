@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-backend-service ### VERY VERY IMPORTANT -- NGINX PROXYPASS need this name
+  labels:
+    app: backend-restapp
+    tier: backend
+
+spec:
+  type: ClusterIP ## Cluster IP is a default service
+  selector:
+    app: backend-restapp
+  ports:
+  - name: http
+    port: 8080  # Cluster IP service port
+    targetPort: 8080 # COntainer port
