@@ -1,0 +1,92 @@
+---
+# Source: nginx-sg-chart/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: values.yaml-nginx-sg-chart
+  labels:
+    helm.sh/chart: nginx-sg-chart-0.1.0
+    app.kubernetes.io/name: nginx-sg-chart
+    app.kubernetes.io/instance: values.yaml
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: nginx-sg-chart
+    app.kubernetes.io/instance: values.yaml
+---
+# Source: nginx-sg-chart/templates/sts-nginx.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: values.yaml-nginx-sg-chart
+  labels:
+    helm.sh/chart: nginx-sg-chart-0.1.0
+    app.kubernetes.io/name: nginx-sg-chart
+    app.kubernetes.io/instance: values.yaml
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  serviceName: "nginxchart-nginx-sg-chart"
+  replicas: 1
+  #podManagementPolicy: Parallel
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nginx-sg-chart
+      app.kubernetes.io/instance: values.yaml
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: nginx-sg-chart
+        app.kubernetes.io/instance: values.yaml
+    spec:
+      containers:
+      - name:  nginx-sg-chart
+        image: "nginx:1.16.0"
+        volumeMounts:
+        - name: www
+          mountPath: /usr/share/nginx/html
+        ports:
+        - containerPort: 8081
+          name: http
+          protocol: TCP
+        - containerPort: 8443
+          name: https
+          protocol: TCP
+  volumeClaimTemplates:
+  - metadata:
+      name: www
+    spec:
+      storageClassName: managed-nfs-storage
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 100Mi
+---
+# Source: nginx-sg-chart/templates/tests/test-connection.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "values.yaml-nginx-sg-chart-test-connection"
+  labels:
+    helm.sh/chart: nginx-sg-chart-0.1.0
+    app.kubernetes.io/name: nginx-sg-chart
+    app.kubernetes.io/instance: values.yaml
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['values.yaml-nginx-sg-chart:80']
+  restartPolicy: Never

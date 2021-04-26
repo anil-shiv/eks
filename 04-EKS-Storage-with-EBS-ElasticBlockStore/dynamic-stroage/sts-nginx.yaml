@@ -36,6 +36,13 @@ spec:
         volumeMounts:
         - name: www
           mountPath: /usr/share/nginx/html
+        ports:
+        - containerPort: 8081
+          name: http
+          protocol: TCP
+        - containerPort: 8443
+          name: https
+          protocol: TCP
   volumeClaimTemplates:
   - metadata:
       name: www

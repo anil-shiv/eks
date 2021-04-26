@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "nginx-sg-chart.fullname" . }}
+  labels:
+    {{- include "nginx-sg-chart.labels" . | nindent 4 }}
+spec:
+  serviceName: "nginxchart-nginx-sg-chart"
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  #podManagementPolicy: Parallel
+  selector:
+    matchLabels:
+      {{- include "nginx-sg-chart.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "nginx-sg-chart.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - name:  {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        volumeMounts:
+        - name: www
+          mountPath: /usr/share/nginx/html
+        ports:
+        - containerPort: {{ .Values.port1.containerPort }}
+          name: {{ .Values.port1.name }}
+          protocol: TCP
+        - containerPort: {{ .Values.port2.containerPort }}
+          name: {{ .Values.port2.name }}
+          protocol: TCP
+  volumeClaimTemplates:
+  - metadata:
+      name: www
+    spec:
+      storageClassName: managed-nfs-storage
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 100Mi
