@@ -10,7 +10,7 @@ spec:
   - name: http
     port: 80
     targetPort: 80
-    nodePort: 31234
+    #nodePort: 31234
   selector:
     run: nginx-sts-demo
 ---
@@ -36,18 +36,11 @@ spec:
         volumeMounts:
         - name: www
           mountPath: /usr/share/nginx/html
-        ports:
-        - containerPort: 8081
-          name: http
-          protocol: TCP
-        - containerPort: 8443
-          name: https
-          protocol: TCP
   volumeClaimTemplates:
   - metadata:
       name: www
     spec:
-      storageClassName: managed-nfs-storage
+      storageClassName: managed-nfs-storage1
       accessModes:
         - ReadWriteOnce
       resources:

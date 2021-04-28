@@ -58,17 +58,17 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
-resources: {}
+resources: 
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
   # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+   limits:
+     cpu: 100m
+     memory: 128Mi
+   requests:
+     cpu: 100m
+     memory: 128Mi
 
 autoscaling:
   enabled: false
@@ -82,20 +82,30 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+ports1: 
+  - containerPort: 80
+    name: http
+  - containerPort: 443
+    name: https
+  - containerPort: 447653
+    name: htt1
 
-port1: 
-  containerPort: 80
-  name: http
-port2:  
-  containerPort: 443
-  name: https
 
 readinessProbe:
   httpGet:
     path: /usermgmt/health-status
     port: 8095
-  initialDelaySeconds: 60
+  initialDelaySeconds: 10
   periodSeconds: 10
 
 volumeMounts:
   mountPath: /usr/share/nginx/html
+
+volumeClaimTemplates:
+  - spec:
+      storageClassName: managed-nfs-storage
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 100Mi
